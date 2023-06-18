@@ -1,6 +1,6 @@
 import { Box, Flex } from "@chakra-ui/react"
 
-export default function UserCard({ user, setModalData }) {
+export default function UserCard({ user, onDelete }) {
   const { id, name, email, phone } = user
 
   return (
@@ -14,7 +14,7 @@ export default function UserCard({ user, setModalData }) {
       rounded="xl"
       shadow="lg"
       borderWidth="1px"
-      onClick={() =>setModalData(user)}
+      onClick={() => onDelete(id)}
     >
       <Box w="full" h="full">
         <Box
