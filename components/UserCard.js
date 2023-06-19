@@ -1,7 +1,35 @@
-import { Box, Flex } from "@chakra-ui/react"
+import { Box, Flex, useToast } from "@chakra-ui/react"
+import { selectUserById, userRemove } from "@my-redux/usersSlice"
+import { useEffect } from "react"
+import { useDispatch, useSelector } from "react-redux"
 
-export default function UserCard({ user, onDelete }) {
-  const { id, name, email, phone } = user
+export default function UserCard({ id }) {
+  const dispatch = useDispatch()
+  const toast = useToast()
+  const user = useSelector((state) => selectUserById(state, id))
+  const error = useSelector((state) => state.users.error)
+  const { name, email, phone } = user
+  const toastMessage = (title, message, status) => {
+    toast({
+      title,
+      description: message,
+      status: status,
+      duration: 3000,
+      isClosable: true,
+    })
+  }
+  const onDelete = (userId) => {
+    try {
+      dispatch(userRemove(userId))
+      toastMessage("User Deletion", "Successful", "success")
+    } catch (err) {
+      toastMessage("Error Catched.", (err?.message ?? "Opps there seems to be an error"), "error")
+    }
+  }
+  useEffect(()=>{
+    if (!!error) toastMessage("Error Catched.", error, "error")
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  },[error])
 
   return (
     <Flex

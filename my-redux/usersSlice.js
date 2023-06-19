@@ -1,25 +1,22 @@
-import _ from 'lodash'
 import {
   createEntityAdapter,
   createAsyncThunk,
   createSlice,
+  createSelector,
 } from "@reduxjs/toolkit"
 import { getUserList } from "@services/api"
 
 const userEntityAdapter = createEntityAdapter({
-  entities: [],
-  ids: [],
-  loaded: false,
-  fetching: false,
+  selectId: (user) => user.id,
+  sortComparer: (a, b) => a.name.localeCompare(b.name),
   error: ""
 })
 export const fetchUsers = createAsyncThunk(
   "users/fetchUsers",
-  async (id = 0, { rejectWithValue }) => {
+  async (_,{ rejectWithValue }) => {
     try {
-      return await getUserList(id)
+      return await getUserList()
     } catch (err) {
-      // You can choose to use the message attached to err or write a custom error
       return rejectWithValue(err?.message ?? "Opps there seems to be an error")
     }
   }
@@ -29,40 +26,15 @@ export const usersSlice = createSlice({
   name: "users",
   initialState: userEntityAdapter.getInitialState(),
   reducers: {
-    deleteUser(state, action){
-      state.entities = state.entities.filter(o=>o.id !== action.payload)
-      state.ids = state.ids.filter(o=>o !== action.payload)
-      state.loaded = true
-      state.fetching = false
-      state.error = ""
-    },
-    deleteFailed(state, action){
-      state.loaded = false
-      state.fetching = false
-      state.error = action.payload
-    }
+    userRemove: userEntityAdapter.removeOne
   },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchUsers.fulfilled, (state, action) => {
-        state.entities = action.payload
-        state.ids = action.payload.map(o=>o.id)
-        state.loaded = true
-        state.fetching = false
-        state.error = ""
-      })
-      .addCase(fetchUsers.pending, (state) => {
-        state.loaded = false
-        state.fetching = true
-        state.error = ""
-      })
-      .addCase(fetchUsers.rejected, (state, { error }) => {
-        state.loaded = false
-        state.fetching = false
-        state.error = error.message
-      })
-  },
+      .addCase(fetchUsers.fulfilled, userEntityAdapter.setAll)
+      .addCase(fetchUsers.rejected, userEntityAdapter.updateOne)
+  }
 })
 
-export const { deleteUser, deleteFailed } = usersSlice.actions
-export const selectAllUsers = (state) => state.users
+export const { userRemove } = usersSlice.actions
+export const { selectAll: selectUsers, selectById: selectUserById } = userEntityAdapter.getSelectors(state => state.users)
+export const selectUserIds = createSelector(selectUsers, (users) => users.map((user) => user.id))
