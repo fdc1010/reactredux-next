@@ -38,9 +38,7 @@ export const usersSlice = createSlice({
 export const { userRemove } = usersSlice.actions
 export const { selectAll: selectUsers, selectById: selectUserById } = userEntityAdapter.getSelectors(state => state.users)
 export const selectUserIds = createSelector(selectUsers, (users) => users.map((user) => user.id))
-export const selectIds = (state) => state.users.ids.map(o=>o)
 
 const UsersReducer = usersSlice.reducer
 
 export default UsersReducer
-
