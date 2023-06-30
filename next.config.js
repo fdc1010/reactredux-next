@@ -5,7 +5,7 @@ const nextConfig = {
     domains: ["res.cloudinary.com"]
   },
   env: {
-    API_ENDPOINT:"http://jsonplaceholder.typicode.com"
+    API_ENDPOINT:"https://jsonplaceholder.typicode.com"
   }
 }
 
